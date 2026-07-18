@@ -1,0 +1,7 @@
+# Security & Large Files
+data/
+*.zip
+*.rar
+*.pt
+*.pth
+.env
