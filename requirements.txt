@@ -1,1 +1,2 @@
 # No external dependencies currently required for the base Rule-based Missing Teeth detector.
+git+https://github.com/HyunchanAn/Dental_Core.git@master
