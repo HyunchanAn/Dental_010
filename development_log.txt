@@ -1,0 +1,26 @@
+2026-07-13
+- FDI 치식 기반 결손치(Missing Teeth) 및 과잉치 판정 모듈(`Dental_010`) 초기 커밋 및 집합 차집합 기반 `MissingSupernumeraryDetector`(`src/detector.py`) 구현 완료.
+
+2026-07-14
+- `Dental_008` 치아 분할 결과 연동 인터페이스 및 `README.md` 명세 업데이트 완료.
+
+2026-07-19
+- `.gitignore` 보강 및 글로벌 CI/CD 통과를 위한 설정·경로 정비 완료.
+
+2026-07-21
+- 중앙 재사용 CI 워크플로우(`reusable-ci.yml`) 마이그레이션 및 Dockerfile 테스트 경로 수정 완료.
+
+2026-08-17
+- 연구 보안 및 저장소 위생 베이스라인 적용 완료.
+
+2026-09-28
+- `Dental_Core` 의존성 브랜치(`@main`) 정렬 완료.
+
+2026-10-20
+- MIT `LICENSE` 파일 추가 및 라이선스 고지(`Dental_000#7`) 반영 완료.
+
+2026-10-21
+- 이슈 #1 해결: 불필요한 `export_onnx.py` 제거, `Dental_Panoramic_Reader`의 동적 정중선 및 인접치 갭 비율(`gap_ratio >= 1.55`, 잔존치 8개 미만 안전 가드, 최후방 구치 `uncertain_missing` 격리) 휴리스틱(`evaluate_missing_teeth_from_boxes`)을 `src/detector.py`에 통합, 단위 테스트(`tests/test_detector.py`) 추가 및 `README.md` 배지(`Rule-Based Heuristic`)·10례 벤치마크 결과 업데이트 완료.
+
+2026-10-25
+- 전 시리즈 표준 양식(`YYYY-MM-DD` 헤더 및 하이픈 불릿)에 맞춘 루트 `development_log.txt` 구축 및 정돈 완료.
