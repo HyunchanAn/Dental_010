@@ -1,11 +1,16 @@
-# Dental_010 (Missing & Supernumerary Teeth Detection)
+![Status](https://img.shields.io/badge/Status-Rule--Based%20Heuristic-yellowgreen "Status") ![Python](https://img.shields.io/badge/Python-3.12%2B-blue "Python") ![Backend](https://img.shields.io/badge/Backend-Set%20Logic%20%2B%20Spatial%20Gap%20Heuristic-blue "Backend") ![License](https://img.shields.io/badge/License-MIT-green "License") ![CI/CD Pipeline](https://img.shields.io/badge/CI%2FCD%20Pipeline-passing-brightgreen?logo=github "CI/CD Pipeline")
 
-![Status](https://img.shields.io/badge/Status-Rule--Based%20Heuristic-yellowgreen) ![Python](https://img.shields.io/badge/Python-3.12%2B-blue) ![Backend](https://img.shields.io/badge/Backend-Set%20Logic%20%2B%20Spatial%20Gap%20Heuristic-blue) ![License](https://img.shields.io/badge/License-MIT-green) ![CI/CD Pipeline](https://img.shields.io/badge/CI%2FCD%20Pipeline-passing-brightgreen?logo=github)
+# Dental_010: Missing & Supernumerary Teeth Detection (결손치 및 과잉치 기하학적 식별)
 
-이 모듈은 `Dental_008` (Instance Segmentation & FDI Numbering) 모듈에서 산출된 치아 FDI 번호와 바운딩 박스 좌표를 바탕으로 결손치(Missing Teeth) 및 과잉치(Supernumerary Teeth)를 2단계 기하학적 규칙(Rule-based Heuristic)으로 판별하는 모듈입니다.
+## 개요
 
-## 통합 아키텍처 및 알고리즘 (Unified Heuristic Architecture)
+`Dental_010`은 선행 치아 분할 모듈(`Dental_008`)에서 산출된 치아 FDI 번호와 바운딩 박스 좌표를 바탕으로 결손치(Missing Teeth) 및 과잉치(Supernumerary Teeth)를 다단계 기하학적 규칙(Rule-based Heuristic)으로 판별하는 모듈입니다.
 
+---
+
+## 주요 기능 및 아키텍처
+
+### 1. 통합 아키텍처 및 알고리즘 (`src/detector.py`)
 기존 `Dental_Panoramic_Reader/modules/dental_010_heuristic.py`에 분리되어 있던 실사용 공간 검증 로직을 본 저장소의 `src/detector.py`로 일원화하였습니다.
 
 1. [1단계: 성인 32개 영구치 집합 차집합 (`MissingToothDetector.detect`)]:
@@ -18,31 +23,44 @@
    - 중절치(`#11, #21, #31, #41`) 바운딩 박스 중심으로부터 동적 정중선(`midline_x`)을 추정합니다.
    - 결손 후보 치아의 근심(Mesial) 및 원심(Distal) 인접치가 모두 존재할 때 중심간 거리 비율(`r_gap > 0.65` 또는 인접치 폭 대비 `gap_ratio >= 1.55`)을 충족하는 경우에만 `verified_missing`으로 확정하고, 교정 발치 후 치아 이동으로 공간이 닫힌 경우에는 `UNCERTAIN_DRIFT_OR_IMPACTION`으로 분류합니다.
 
-## 벤치마크 및 검증 결과 (Benchmark & Validation)
+- [가중치 파일 안내]: 본 모듈은 별도의 딥러닝 가중치 파일이 불필요한 규칙 기반 기하학 휴리스틱 모듈입니다.
+
+---
+
+## 벤치마크 및 검증 성능
 
 - [통합 벤치마크 (`260903_2205_Dental_Modules_Comprehensive_Benchmark_Report.md` & `10_cases_quantitative_benchmark.json`)]:
   - 32개 영구치 차집합 연산 정합성: `100%`
   - 최후방 구치(`#18, #28, #38, #48` 등) 미맹출 오판 방어 격리율: `100%`
   - 복합 파노라마(`panoramic-x-ray-thegem-blog-default.jpg`) 과잉치(`#19, #29`) 골드 어노테이션 대조 결과: `#29` 후보 검출(`candidate_iou = 0.16 < 0.25`) 및 `#19` 미검출로, 과잉치 직접 시각 탐지는 선행 세그멘테이션(`Dental_008`)의 클래스 정의에 종속됨을 확인하고 한계점으로 명시함.
 - [단위 테스트 (`tests/test_detector.py`)]:
-  - 32개 영구치 차집합 하위 호환성, `< 8` 최소 치아 수 안전 가드, 최후방 구치 격리, 인접 갭 비율(`gap_ratio >= 1.55`) 확정 및 교정 공간 폐쇄(`gap_ratio < 1.55`) 유보 시나리오를 검증합니다.
+  - 32개 영구치 차집합 하위 호환성, `< 8` 최소 치아 수 안전 가드, 최후방 구치 격리, 인접 갭 비율(`gap_ratio >= 1.55`) 확정 및 교정 공간 폐쇄(`gap_ratio < 1.55`) 유보 시나리오를 검증합니다 (`4 passed`).
+- [한계점 (Limitations)]:
+  1. [선행 분할 모듈(`Dental_008`) 의존성]: 본 모듈은 `Dental_008`이 출력한 FDI 번호와 바운딩 박스를 입력으로 사용하므로, 선행 모듈에서 FDI 치식 밀림(Shift)이 발생하면 결손 위치 추정에 영향을 받습니다.
+  2. [교정 발치 공간 폐쇄]: 소구치 발치 교정 등으로 치간 공극이 완전히 닫힌 경우, 기하학적 갭 비율이 임계값 미만으로 측정되어 `uncertain_missing`으로 분류됩니다.
 
-## 한계점 (Limitations)
-1. [선행 분할 모듈(`Dental_008`) 의존성]: 본 모듈은 `Dental_008`이 출력한 FDI 번호와 바운딩 박스를 입력으로 사용하므로, 선행 모듈에서 FDI 치식 밀림(Shift)이 발생하면 결손 위치 추정에 영향을 받습니다.
-2. [교정 발치 공간 폐쇄]: 소구치 발치 교정 등으로 치간 공隙이 완전히 닫힌 경우, 기하학적 갭 비율이 임계값 미만으로 측정되어 `uncertain_missing`으로 분류됩니다.
+---
+
+## 데이터셋 출처 및 라이선스
+
+- 본 모듈은 선행 `Dental_008` FDI 치식 및 바운딩 박스 좌표를 입력으로 사용하며 별도의 원본 환자 데이터셋을 재배포하지 않습니다.
+- [소스 코드 라이선스]: 본 프로젝트의 소스 코드는 `MIT License` ([LICENSE](LICENSE), `Copyright (c) 2026 Hyunchan An`) 하에 배포됩니다.
+
+---
 
 ## 설치 및 실행 방법
+
 ```bash
 pip install -r requirements.txt
 pytest tests/test_detector.py -v
 ```
 
-## 가중치 파일 안내
-본 모듈은 가중치 모델이 불필요한 룰베이스/기하학 휴리스틱 모듈이므로, 별도의 딥러닝 가중치 파일이 요구되지 않습니다.
+---
 
-## 연구용 실행 주의사항
-- 기본 실행 주소: 127.0.0.1 (로컬 전용)
-- 외부 공개/상용 배포 금지
-- API 키·토큰은 환경변수로만 관리
-- 오픈 데이터셋 외 민감 의료데이터 사용 금지
-- 외부 접근이 필요하면 ALLOW_EXTERNAL_ACCESS=true 로만 명시적 허용
+## 참고 문헌 및 연구용 실행 주의사항
+
+- FDI World Dental Federation Two-Digit Tooth Numbering System (ISO 3950).
+- [연구용 실행 주의사항]:
+  - 기본 실행 주소: `127.0.0.1` (로컬 전용)
+  - 외부 공개/상용 배포 금지 및 오픈 데이터셋 외 민감 의료데이터 사용 금지
+  - API 키·토큰은 환경변수로만 관리하며, 외부 접근이 필요하면 `ALLOW_EXTERNAL_ACCESS=true`로만 명시적 허용
