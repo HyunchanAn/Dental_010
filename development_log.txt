@@ -24,3 +24,6 @@
 
 2026-10-25
 - 전 시리즈 표준 양식(`YYYY-MM-DD` 헤더 및 하이픈 불릿)에 맞춘 루트 `development_log.txt` 구축 및 정돈 완료.
+
+2026-10-28
+- 이슈 #2 해결: `requirements.txt`에 `numpy` 및 `opencv-python-headless`를 명시하고 `Dental_000/tests/tests_009_010/test_integrated_pipeline.py` 미수집(Exit Code 5) 결함 수정 및 `.github/workflows/ci.yml` 자체 테스트(`tests/`) 병행 실행을 적용하여 원격 CI 복구 완료.
